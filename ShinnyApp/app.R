@@ -91,7 +91,7 @@ server <- function(input, output) {
             beers <- beers %>% filter(stri_detect_fixed(State, toupper(input$stateFilter)))    
         }
         
-        beers %>% ggplot(aes(x=ABV, y=IBU.clean)) + geom_point() + geom_smooth(method="lm") + ggtitle("IBU vs ABV")
+        beers %>% ggplot(aes(x=ABV, y=IBU)) + geom_point() + geom_smooth(method="lm") + ggtitle("IBU vs ABV")
     })
     
     output$beerPieChart <- renderPlot({

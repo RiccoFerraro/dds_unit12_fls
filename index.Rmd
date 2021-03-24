@@ -18,7 +18,6 @@ library(shiny)
 library(ggplot2)
 library(tidyverse)
 library(tidyr)
-
 ui <- fluidPage(
   # App title ----
   tabsetPanel(
@@ -31,7 +30,7 @@ ui <- fluidPage(
              div("“The other tabs represent work / analyses that I have completed.  Please check them out!”")),
     tabPanel("Beer Study", 
              includeHTML("BeersAndBrews.html")),
-    tabPanel("Link to the Beer App", )
+    tabPanel("Beers Shiny App", a("https://riccoferraromsds.shinyapps.io/ShinnyApp/"))
   )
 )
 

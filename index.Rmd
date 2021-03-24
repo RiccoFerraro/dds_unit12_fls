@@ -8,43 +8,13 @@ runtime: shiny
 
 
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
+# About Me:
+## Ricco Ferraro
+### Senior Software Engineer, Tandem Diabetes Care
+### Masters of Data Science student at SMU+
+### San Luis Obispo, CA
 
-
-```{r }
-library(shiny)
-library(ggplot2)
-library(tidyverse)
-library(tidyr)
-ui <- fluidPage(
-  # App title ----
-  tabsetPanel(
-    tabPanel("About Me:",
-             h3("Ricco Ferraro"), 
-             div("Senior Software Engineer, Tandem Diabetes Care"), 
-             div("Masters of Data Science student at SMU"), 
-             div("San Luis Obispo, CA"), 
-             imageOutput("profilePic"), 
-             div("“The other tabs represent work / analyses that I have completed.  Please check them out!”")),
-    tabPanel("Beer Study", 
-             includeHTML("BeersAndBrews.html")),
-    tabPanel("Beers Shiny App", a("https://riccoferraromsds.shinyapps.io/ShinnyApp/"))
-  )
-)
-
-# Define server logic required to draw a histogram ----
-server <- function(input, output) {
-
-  output$profilePic <- renderImage({
-    list(src = "./profilePic.png",
-         height = 400,
-         width = 300,
-         alt = paste("ProfilePic", input$n))
-  })
-}
-shinyApp(ui, server)
-```
+![My Kiddos](profilePic.png "Ricco's Kiddos")
+The other tabs represent work / analyses that I have completed.  Please check them out!
 
 

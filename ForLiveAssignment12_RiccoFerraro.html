@@ -308,22 +308,72 @@ $(document).ready(function () {
 </div>
 
 
-<div id="section-about-me" class="section level1">
-<h1>About Me:</h1>
-<div id="section-ricco-ferraro" class="section level2">
-<h2>Ricco Ferraro</h2>
-<div id="section-senior-software-engineer-tandem-diabetes-care" class="section level3">
-<h3>Senior Software Engineer, Tandem Diabetes Care</h3>
-</div>
-<div id="section-masters-of-data-science-student-at-smu" class="section level3">
-<h3>Masters of Data Science student at SMU+</h3>
-</div>
-<div id="section-san-luis-obispo-ca" class="section level3">
-<h3>San Luis Obispo, CA</h3>
-<p><img src="profilePic.png" title="Ricco&#39;s Kiddos" alt="My Kiddos" /> The other tabs represent work / analyses that I have completed. Please check them out!</p>
-</div>
-</div>
-</div>
+<pre class="r"><code>library(shiny)
+
+ui &lt;- fluidPage(
+  # App title ----
+  tabsetPanel(
+    tabPanel(&quot;About Me:&quot;, h3(&quot;Ricco Ferraro&quot;), div(&quot;Senior Software Engineer, Tandem Diabetes Care&quot;), div(&quot;Masters of Data Science student at SMU&quot;), div(&quot;San Luis Obispo, CA&quot;), imageOutput(&quot;profilePic&quot;), div(&quot;“The other tabs represent work / analyses that I have completed.  Please check them out!”&quot;)),
+    tabPanel(&quot;Beer Study&quot;, includeHTML(&quot;BeersAndBrews.html&quot;)),
+    tabPanel(&quot;TODO&quot;, div(&quot;fill this in&quot;))
+  ),
+  # # Sidebar layout with input and output definitions ----
+  # sidebarLayout(
+  # 
+  #   # Sidebar panel for inputs ----
+  #   sidebarPanel(
+  # 
+  #     # Input: Slider for the number of bins ----
+  #     sliderInput(inputId = &quot;bins&quot;,
+  #                 label = &quot;Number of bins:&quot;,
+  #                 min = 1,
+  #                 max = 50,
+  #                 value = 30)
+  #   ),
+  #   # Main panel for displaying outputs ----
+  #   mainPanel(
+  #     # Output: Histogram ----
+  #     plotOutput(outputId = &quot;distPlot&quot;)
+  #   )
+  # )
+)
+
+
+# Define server logic required to draw a histogram ----
+server &lt;- function(input, output) {
+  
+  # Histogram of the Old Faithful Geyser Data ----
+  # with requested number of bins
+  # This expression that generates a histogram is wrapped in a call
+  # to renderPlot to indicate that:
+  #
+  # 1. It is &quot;reactive&quot; and therefore should be automatically
+  #    re-executed when inputs (input$bins) change
+  # # 2. Its output type is a plot
+  # output$distPlot &lt;- renderPlot({0
+  #   
+  #   x    &lt;- faithful$waiting
+  #   bins &lt;- seq(min(x), max(x), length.out = input$bins + 1)
+  #   
+  #   hist(x, breaks = bins, col = &quot;#75AADB&quot;, border = &quot;white&quot;,
+  #        xlab = &quot;Waiting time to next eruption (in mins)&quot;,
+  #        main = &quot;Histogram of waiting times&quot;)
+  #   
+  # })
+  output$profilePic &lt;- renderImage({
+    list(src = &quot;./profilePic.png&quot;,
+         # height = 400, 
+         # width = 300,
+         alt = paste(&quot;ProfilePic&quot;, input$n))
+  })
+}
+
+
+shinyApp(ui, server)</code></pre>
+<iframe data-deferred-src="app3dbe5eee1d87dc732a020928bbb925ef/?w=&amp;__subapp__=1" width="100%" height="400" class="shiny-frame shiny-frame-deferred"></iframe>
+<p>Note the use of the <code>height</code> parameter to determine how much vertical space the embedded application should occupy.</p>
+<p>You can also use the <code>shinyApp</code> function to define an application inline rather then in an external directory.</p>
+<p>In all of R code chunks above the <code>echo = FALSE</code> attribute is used. This is to prevent the R code within the chunk from rendering in the document alongside the Shiny components.</p>
 
 
 

@@ -12,7 +12,7 @@
 <meta name="author" content="Ricco Ferraro" />
 
 
-<title>ForLiveAssignment12_RiccoFerraro</title>
+<title>ShinyApp</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -301,29 +301,186 @@ $(document).ready(function () {
 
 
 
-<h1 class="title toc-ignore">ForLiveAssignment12_RiccoFerraro</h1>
+<h1 class="title toc-ignore">ShinyApp</h1>
 <h4 class="author">Ricco Ferraro</h4>
 <h4 class="date">3/23/2021</h4>
 
 </div>
 
 
-<div id="section-about-me" class="section level1">
-<h1>About Me:</h1>
-<div id="section-ricco-ferraro" class="section level2">
-<h2>Ricco Ferraro</h2>
-<div id="section-senior-software-engineer-tandem-diabetes-care" class="section level3">
-<h3>Senior Software Engineer, Tandem Diabetes Care</h3>
-</div>
-<div id="section-masters-of-data-science-student-at-smu" class="section level3">
-<h3>Masters of Data Science student at SMU+</h3>
-</div>
-<div id="section-san-luis-obispo-ca" class="section level3">
-<h3>San Luis Obispo, CA</h3>
-<p><img src="profilePic.png" title="Ricco&#39;s Kiddos" alt="My Kiddos" /> The other tabs represent work / analyses that I have completed. Please check them out!</p>
-</div>
-</div>
-</div>
+<p>This R Markdown document is made interactive using Shiny. Unlike the more traditional workflow of creating static reports, you can now create documents that allow your readers to change the assumptions underlying your analysis and see the results immediately.</p>
+<p>To learn more, see <a href="http://rmarkdown.rstudio.com/authoring_shiny.html">Interactive Documents</a>.</p>
+<p>The Shiny App</p>
+<pre class="r"><code>library(&quot;shiny&quot;)
+library(&quot;stringi&quot;)
+
+options(shiny.maxRequestSize = 9*1024^2)
+
+server &lt;- function(input, output) {
+
+  # the data read in by read.csv will now be accessible throughout the app
+  # by calling this reactive, e.g. in_data().
+  in_data.Beer &lt;- reactive({
+    shiny::validate(
+      need(input$beers, &quot;Select a file!&quot;)
+    )
+
+    read.csv(input$beers$datapath, header = input$header.beers)
+  })
+  
+  in_data.Breweries &lt;- reactive({
+    shiny::validate(
+      need(input$breweries, &quot;Select a file!&quot;)
+    )
+
+    read.csv(input$breweries$datapath, header = input$header.breweries)
+  })
+  
+    in_data.Merged &lt;- reactive({
+      beers &lt;- in_data.Beer()
+      breweries &lt;- in_data.Breweries()
+     
+      if (is.null(beers) | is.null(breweries))
+        return
+      
+      bdat = merge(beers, breweries, by.x = &quot;Brewery_id&quot;, by.y = &quot;Brew_ID&quot;)
+      names(bdat)[names(bdat) == &quot;Name.x&quot;] &lt;- &quot;Drink_name&quot;
+      names(bdat)[names(bdat) == &quot;Name.y&quot;] &lt;- &quot;Brewery&quot;
+      bdat$State = as.factor(bdat$State)
+      bdat
+  })
+
+  # an example, we&#39;re calling the reactive to access the data loaded
+  output$beersFileInfo &lt;- renderTable({
+    if(input$show.data) {
+      data.frame(in_data.Merged())
+        }
+  })
+  
+    # an example, we&#39;re calling the reactive to access the data loaded
+  output$breweriesFileInfo &lt;- renderTable({
+    if(input$show.breweries.data) {
+      data.frame(in_data.Breweries())
+    }
+  })
+
+  output$beerHistogram.IBU &lt;- renderPlot({
+    beers &lt;- in_data.Merged()
+
+    if (is.null(beers))
+      return(NULL)
+    
+    if(!is.na(input$stateFilter) &amp;&amp; input$stateFilter != &quot;&quot;) {
+      print(input$stateFilter)
+      beers &lt;- beers %&gt;% filter(stri_detect_fixed(State, toupper(input$stateFilter)))    
+    }
+
+    beersplot &lt;- beers %&gt;%  ggplot(aes(x=IBU, fill=State))
+    if(input$plotSelector == &quot;histogram&quot;){
+       return(beersplot + geom_histogram() + ggtitle(&quot;Histogram of IBU for craft Beers&quot;))
+    }
+    
+    if(input$plotSelector == &quot;boxplot&quot;){
+      return(beersplot + geom_boxplot() + ggtitle(&quot;boxplot of IBU for craft Beers&quot;))
+    }
+  })
+  
+    output$beerScatterPot &lt;- renderPlot({
+      
+      if(!input$show.scatter)
+        return(NULL)
+      
+    beers &lt;- in_data.Merged()
+
+    if (is.null(beers))
+      return(NULL)
+    
+    if(!is.na(input$stateFilter) &amp;&amp; input$stateFilter != &quot;&quot;) {
+      print(input$stateFilter)
+      beers &lt;- beers %&gt;% filter(stri_detect_fixed(State, toupper(input$stateFilter)))    
+    }
+
+    bdat.imputed.IBU.clean %&gt;% ggplot(aes(x=ABV, y=IBU.clean)) + geom_point() + geom_smooth(method=&quot;lm&quot;) + ggtitle(&quot;IBU vs ABV&quot;)
+  })
+    
+    output$beerPieChart &lt;- renderPlot({
+      
+      if(!input$show.scatter)
+        return(NULL)
+      
+      beers &lt;- in_data.Merged()
+
+      if (is.null(beers))
+        return(NULL)
+    
+    if(!is.na(input$stateFilter) &amp;&amp; input$stateFilter != &quot;&quot;) {
+      print(input$stateFilter)
+      beers &lt;- beers %&gt;% filter(stri_detect_fixed(State, toupper(input$stateFilter)))    
+    }
+
+    brewNum = beers %&gt;% 
+      filter(!is.na(Brewery_id)) %&gt;% 
+      group_by(State) %&gt;% summarize(unique_breweries=length(unique(Brewery_id))) 
+
+    brewNum %&gt;%  ggplot(aes(x=unique_breweries, y=&quot;&quot;,fill=State)) + geom_bar(stat = &quot;identity&quot;, colour=&quot;black&quot;) + coord_polar(&quot;x&quot;, start=0) + ggtitle(&quot;Unique Breweries By state&quot;)
+  })
+  
+  output$beerHistogram.ABV &lt;- renderPlot({
+    beers &lt;- in_data.Merged()
+
+    if (is.null(beers))
+      return(NULL)
+    
+    if(!is.na(input$stateFilter) &amp;&amp; input$stateFilter != &quot;&quot;) {
+      print(input$stateFilter)
+      beers &lt;- beers %&gt;% filter(stri_detect_fixed(State, toupper(input$stateFilter)))    
+    }
+
+    beersplot &lt;- beers %&gt;%  ggplot(aes(x=ABV, fill=State))
+    if(input$plotSelector == &quot;histogram&quot;){
+       return(beersplot + geom_histogram() + ggtitle(&quot;Histogram of ABV for craft Beers&quot;))  
+    }
+    
+    if(input$plotSelector == &quot;boxplot&quot;){
+      return(beersplot + geom_boxplot() + ggtitle(&quot;boxplot of ABV for craft Beers&quot;))
+    }
+  })
+}
+
+ui &lt;- fluidPage(
+  tabPanel(&#39;File Inputs&#39;,
+    sidebarLayout(
+      sidebarPanel(
+        fileInput(&#39;beers&#39;, &#39;Choose Beers CSV File&#39;, accept = c(&#39;text/csv&#39;, &#39;text/comma-separated-values,text/plain&#39;, &#39;.csv&#39;)),
+        checkboxInput(&#39;header.beers&#39;, &#39;Header in Beers&#39;, TRUE),
+        fileInput(&#39;breweries&#39;, &#39;Choose Breweries CSV File&#39;, accept = c(&#39;text/csv&#39;, &#39;text/comma-separated-values,text/plain&#39;, &#39;.csv&#39;)),
+        checkboxInput(&#39;header.breweries&#39;, &#39;Header in Breweries&#39;, TRUE),
+        checkboxInput(&#39;show.data&#39;, &#39;show beer data&#39;, FALSE),
+        checkboxInput(&#39;show.scatter&#39;, &#39;show scatter plot&#39;, TRUE),
+        selectInput(&quot;plotSelector&quot;, &quot;plot:&quot;, choices=c(&quot;histogram&quot;, &quot;boxplot&quot;)),
+        textInput(&quot;stateFilter&quot;, &quot;Filter Plots By State Containing:&quot;)
+      ),
+     shiny::mainPanel(
+        plotOutput(&quot;beerHistogram.IBU&quot;),
+        plotOutput(&quot;beerHistogram.ABV&quot;),
+        plotOutput(&quot;beerScatterPot&quot;),
+        plotOutput(&quot;beerPieChart&quot;),
+        tableOutput(&quot;beersFileInfo&quot;)
+
+    )
+  )
+)
+)
+
+
+
+shinyApp(ui, server)</code></pre>
+<iframe data-deferred-src="appb1af8d6eef1a922b42eae3d339f93ea8/?w=&amp;__subapp__=1" width="100%" height="400" class="shiny-frame shiny-frame-deferred"></iframe>
+<pre class="r"><code># library(rsconnect)
+# rsconnect::deployApp(&#39;ShinyApp.Rmd&#39;)</code></pre>
+<p>Note the use of the <code>height</code> parameter to determine how much vertical space the embedded application should occupy.</p>
+<p>You can also use the <code>shinyApp</code> function to define an application inline rather then in an external directory.</p>
+<p>In all of R code chunks above the <code>echo = FALSE</code> attribute is used. This is to prevent the R code within the chunk from rendering in the document alongside the Shiny components.</p>
 
 
 

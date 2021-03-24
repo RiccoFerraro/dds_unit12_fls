@@ -1,0 +1,8 @@
+name: "ricco-website"
+navbar: 
+  title: "Ricco Ferraro"
+  left: 
+    - text: "Home"
+      href: index.html
+    - text: "Shiny App"
+      href: "https://riccoferraromsds.shinyapps.io/ShinnyApp/"

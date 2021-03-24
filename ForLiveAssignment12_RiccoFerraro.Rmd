@@ -1,0 +1,88 @@
+---
+title: "ForLiveAssignment12_RiccoFerraro"
+author: "Ricco Ferraro"
+date: "3/23/2021"
+output: html_document
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r }
+library(shiny)
+
+ui <- fluidPage(
+  # App title ----
+  tabsetPanel(
+    tabPanel("About Me:", h3("Ricco Ferraro"), div("Senior Software Engineer, Tandem Diabetes Care"), div("Masters of Data Science student at SMU"), div("San Luis Obispo, CA"), imageOutput("profilePic"), div("“The other tabs represent work / analyses that I have completed.  Please check them out!”")),
+    tabPanel("Beer Study", includeHTML("BeersAndBrews.html")),
+    tabPanel("TODO", div("fill this in"))
+  ),
+  # # Sidebar layout with input and output definitions ----
+  # sidebarLayout(
+  # 
+  #   # Sidebar panel for inputs ----
+  #   sidebarPanel(
+  # 
+  #     # Input: Slider for the number of bins ----
+  #     sliderInput(inputId = "bins",
+  #                 label = "Number of bins:",
+  #                 min = 1,
+  #                 max = 50,
+  #                 value = 30)
+  #   ),
+  #   # Main panel for displaying outputs ----
+  #   mainPanel(
+  #     # Output: Histogram ----
+  #     plotOutput(outputId = "distPlot")
+  #   )
+  # )
+)
+
+
+# Define server logic required to draw a histogram ----
+server <- function(input, output) {
+  
+  # Histogram of the Old Faithful Geyser Data ----
+  # with requested number of bins
+  # This expression that generates a histogram is wrapped in a call
+  # to renderPlot to indicate that:
+  #
+  # 1. It is "reactive" and therefore should be automatically
+  #    re-executed when inputs (input$bins) change
+  # # 2. Its output type is a plot
+  # output$distPlot <- renderPlot({0
+  #   
+  #   x    <- faithful$waiting
+  #   bins <- seq(min(x), max(x), length.out = input$bins + 1)
+  #   
+  #   hist(x, breaks = bins, col = "#75AADB", border = "white",
+  #        xlab = "Waiting time to next eruption (in mins)",
+  #        main = "Histogram of waiting times")
+  #   
+  # })
+  output$profilePic <- renderImage({
+    list(src = "./profilePic.png",
+         # height = 400, 
+         # width = 300,
+         alt = paste("ProfilePic", input$n))
+  })
+}
+
+
+shinyApp(ui, server)
+
+```
+
+
+Note the use of the `height` parameter to determine how much vertical space the embedded application should occupy.
+
+You can also use the `shinyApp` function to define an application inline rather then in an external directory.
+
+In all of R code chunks above the `echo = FALSE` attribute is used. This is to prevent the R code within the chunk from rendering in the document alongside the Shiny components.
+
+
+
